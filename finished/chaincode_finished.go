@@ -112,7 +112,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 
 	// Handle different functions
 	if function == "checkBalance" { //read a variable
-		return t.read(stub, args)
+		return t.checkBalance(stub, args)
 	}
 	fmt.Println("query did not find func: " + function)
 
