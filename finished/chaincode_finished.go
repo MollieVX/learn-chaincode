@@ -98,8 +98,6 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 	// Handle different functions
 	if function == "init" {
 		return t.Init(stub, "init", args)
-	} else if function == "write" {
-		return t.write(stub, args)
 	} else if function == "transfer"{
 		return t.transfer(stub, args)
 	}
@@ -113,7 +111,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 	fmt.Println("query is running " + function)
 
 	// Handle different functions
-	if function == "read" { //read a variable
+	if function == "checkBalance" { //read a variable
 		return t.read(stub, args)
 	}
 	fmt.Println("query did not find func: " + function)
@@ -226,5 +224,34 @@ func (t *SimpleChaincode) transfer(stub shim.ChaincodeStubInterface, args []stri
 	}
 
 	return nil, nil
+}
 
+//Function to check balances
+func (t *SimpleChaincode) checkBalance(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var jsonResp string
+
+	if len(args) != 1 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 1")
+	}
+
+	var accCurrent Account
+	var balance int
+
+	accCurrentAsBytes, err := stub.GetState(args[0])
+	if err != nil {
+		jsonResp = "{\"Error\":\"Failed to get state for " + args[0] + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+	err = json.Unmarshal(accCurrentAsBytes, &accCurrent)
+	if err != nil {
+		return nil, errors.New("Failed to marshal string to struct of accCurrent")
+	}
+
+	balance = accCurrent.Balance
+	balanceAsBytes, err := json.Marshal(balance)
+	if err != nil {
+		return nil, errors.New("Failed to marshal balance")
+	}
+
+	return balanceAsBytes, nil
 }
